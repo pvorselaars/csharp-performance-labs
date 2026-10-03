@@ -67,7 +67,7 @@ foreach ($kind in @("solutions", "exercises")) {
         Remove-Job $job -Force
 
         $verdict = "OK"
-        if ($rc -gt $want) { $fail = 1; $verdict = "SURPRISE" }
+        if ($rc -ne $want) { $fail = 1; $verdict = "SURPRISE" }
         "{0,-34} {1,-9} {2,-9} {3}" -f $name, "exit $want", "exit $rc", $verdict | Write-Host
     }
 }
