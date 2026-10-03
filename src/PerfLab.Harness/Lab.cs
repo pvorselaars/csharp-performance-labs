@@ -219,6 +219,8 @@ public static class Lab
 
     // The "Machine factor Nx vs. reference: time budgets scaled (...)" banner mentions whichever of the
     // machine-scaled budgets (time/p99/cpu) this exercise actually gates - none, one or all three.
+    private static string SlackNote() => TimeSlack() > 1.0 ? $" (including PERFLAB_TIME_SLACK={TimeSlack():F1}x)" : "";
+
     private static string ScaledBudgetsBanner(LabSpec spec, double factor)
     {
         var parts = new List<string>();
@@ -226,8 +228,8 @@ public static class Lab
             if (spec.MaxMetrics != null && spec.MaxMetrics.TryGetValue(name, out var max))
                 parts.Add($"{label} {max:F1} -> {max * factor:F2} ms");
         return parts.Count == 0
-            ? $"Machine factor {factor:F2}x vs. reference."
-            : $"Machine factor {factor:F2}x vs. reference: time budgets scaled ({string.Join(", ", parts)}).";
+            ? $"Machine factor {factor:F2}x vs. reference{SlackNote()}."
+            : $"Machine factor {factor:F2}x vs. reference{SlackNote()}: time budgets scaled ({string.Join(", ", parts)}).";
     }
 
     /// <summary>Prints one result row: the median value against its budget, and PASS/FAIL.</summary>
@@ -290,7 +292,7 @@ public static class Lab
 
     private static double MachineFactor()
     {
-        if (Environment.GetEnvironmentVariable("PERFLAB_NO_SCALE") == "1") return 1.0;
+        if (Environment.GetEnvironmentVariable("PERFLAB_NO_SCALE") == "1") return 1.0 * TimeSlack();
         Spin(); // warm up
         var best = double.MaxValue;
         for (var i = 0; i < 4; i++)
@@ -299,8 +301,17 @@ public static class Lab
             Sink = Spin();
             best = Math.Min(best, Stopwatch.GetElapsedTime(t0).TotalMilliseconds);
         }
-        return best / ReferenceSpinMs;
+        return best / ReferenceSpinMs * TimeSlack();
     }
+
+    // PERFLAB_TIME_SLACK=<x >= 1> multiplies every time-scaled budget (Metrics.Time/P99/Cpu, MaxFirstRunMs) on top of
+    // the machine factor. The factor above comes from a single-core spin loop, so it under-corrects for workloads whose
+    // time depends on core count (an in-process web server driven by many virtual users) on a machine with far fewer
+    // cores than the reference. perf-gate.ps1 sets this for *solutions* only, so exercises are still held to the strict
+    // budgets. Allocation and the reported counters are never scaled.
+    private static double TimeSlack() =>
+        double.TryParse(Environment.GetEnvironmentVariable("PERFLAB_TIME_SLACK"), System.Globalization.NumberStyles.Float,
+            System.Globalization.CultureInfo.InvariantCulture, out var x) && x > 1.0 ? x : 1.0;
 
     /// <summary>
     /// --calibrate: prints this machine's own spin-loop time, so you can (re)set ReferenceSpinMs when the

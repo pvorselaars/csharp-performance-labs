@@ -32,7 +32,8 @@ jobs:
         with: { dotnet-version: '10.0.x' }
       - name: Performance gate
         shell: pwsh
-        run: ./scripts/perf-gate.ps1 ${{ matrix.prefix }}
+        # Solutions get 2x slack on time budgets: the runner has far fewer cores than the calibration machine.
+        run: ./scripts/perf-gate.ps1 ${{ matrix.prefix }} -SolutionTimeSlack 2
         env:
           PERFLAB_NO_SCALE: '0'
 

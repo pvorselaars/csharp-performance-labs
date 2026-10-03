@@ -13,13 +13,20 @@ How many extra attempts a project gets when its exit code is not the expected on
 CI runners; a real regression fails every attempt, a noisy-neighbour blip does not. Exit code 2 (wrong result) is
 deterministic and is never retried.
 
+.PARAMETER SolutionTimeSlack
+Multiplier (>= 1) applied to the time-scaled budgets (time, p99, cpu) of *solutions* only, via PERFLAB_TIME_SLACK.
+Concurrent workloads (an in-process web server driven by many virtual users) depend on core count, which the
+single-core machine factor cannot capture, so a CI runner with few cores fails budgets calibrated on a big machine.
+Exercises always run against the strict budgets, and allocation/counter budgets are never scaled.
+
 .EXAMPLE
 ./scripts/perf-gate.ps1
 ./scripts/perf-gate.ps1 L02
 #>
 param(
     [string]$Prefix = "",
-    [int]$Retries = 2
+    [int]$Retries = 2,
+    [double]$SolutionTimeSlack = 1.0
 )
 
 Set-Location (Join-Path $PSScriptRoot "..")
@@ -66,6 +73,8 @@ $total = 0
 
 foreach ($kind in @("solutions", "exercises")) {
     $want = if ($kind -eq "exercises") { 1 } else { 0 }
+    if ($kind -eq "solutions" -and $SolutionTimeSlack -gt 1.0) { $env:PERFLAB_TIME_SLACK = "$SolutionTimeSlack" }
+    else { Remove-Item Env:PERFLAB_TIME_SLACK -ErrorAction SilentlyContinue }
     $dirs = @("labs/*/$kind/$Prefix*", "specializations/*/$kind/$Prefix*") |
         ForEach-Object { Get-ChildItem -Path $_ -Directory -ErrorAction SilentlyContinue } |
         Sort-Object FullName
@@ -98,6 +107,7 @@ foreach ($kind in @("solutions", "exercises")) {
     }
 }
 
+Remove-Item Env:PERFLAB_TIME_SLACK -ErrorAction SilentlyContinue
 $summary = if ($fail -eq 0) { "all as expected" } else { "SURPRISES found" }
 Write-Host "checked $total projects: $summary"
 exit $fail
