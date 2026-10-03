@@ -86,22 +86,27 @@ foreach ($kind in @("solutions", "exercises")) {
 
         $name = "$kind/$($d.Name)"
 
+        # An exercise with no budgets at all is pure exploration (see LabSpec.MaxMetrics): it cannot fail, so the
+        # gate expects it to pass. Every other exercise must fail its budgets.
+        $wantHere = $want
+        if ($kind -eq "exercises" -and (Get-Content $programCs -Raw) -notmatch 'MaxMetrics|MaxFirstRunMs') { $wantHere = 0 }
+
         $total++
 
         $attempt = 0
         do {
             $attempt++
             $rc = Invoke-Project $d.FullName
-        } while ($rc -ne $want -and $rc -ne 2 -and $attempt -le $Retries)
+        } while ($rc -ne $wantHere -and $rc -ne 2 -and $attempt -le $Retries)
 
         $verdict = "OK"
-        if ($rc -ne $want) { $fail = 1; $verdict = "SURPRISE" }
+        if ($rc -ne $wantHere) { $fail = 1; $verdict = "SURPRISE" }
         elseif ($attempt -gt 1) { $verdict = "OK (attempt $attempt)" }
-        "{0,-34} {1,-9} {2,-9} {3}" -f $name, "exit $want", "exit $rc", $verdict | Write-Host
-        if ($rc -ne $want) {
+        "{0,-34} {1,-9} {2,-9} {3}" -f $name, "exit $wantHere", "exit $rc", $verdict | Write-Host
+        if ($rc -ne $wantHere) {
             # Show why: the machine factor and the metric table of the last attempt, so a CI log is enough to
             # tell a tight budget from noise.
-            $lines = $script:LastOutput -split "\r?\n" | Where-Object { $_ -match '^(Machine factor|metric|median|[a-zA-Z0-9]+ +[0-9.]+ +[0-9.]+ |RESULT|WRONG|Unhandled|   at )' } | Select-Object -First 25
+            $lines = @($script:LastOutput -split "\r?\n" | Where-Object { $_.Trim() }) | Select-Object -Last 25
             $lines | ForEach-Object { Write-Host "    $_" }
         }
     }

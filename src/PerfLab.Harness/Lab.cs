@@ -193,7 +193,7 @@ public static class Lab
                 var v = metricRuns.TryGetValue(name, out var list) ? Median(list) : double.NaN;
                 var (label, unit, format, scale, note) = BuiltInMetricDisplay.TryGetValue(name, out var meta) ? meta : (name, "", "F0", false, null);
                 var b = scale ? max * factor : max;
-                var ok = v <= b; extraOk &= ok;
+                var ok = v <= b + (name == Metrics.Alloc ? AllocNoiseMb : 0); extraOk &= ok;
                 Print(label, v, b, unit, ok, format, note);
             }
         var pass = checksumOk && extraOk;
@@ -289,6 +289,11 @@ public static class Lab
     // to 50 ms - the machine every exercise's time-scaled MaxMetrics entries (Metrics.Time/P99/Cpu) are calibrated against. It
     // isn't a "slow box"; it's just the fixed point everything else scales relative to.
     const double ReferenceSpinMs = 50.0;
+
+    // Allocation budgets are deterministic, but the process-wide counter (GC.GetTotalAllocatedBytes) also sees a few KB
+    // of runtime-internal allocation (tiered-JIT and GC background threads) that varies with the machine. A zero-alloc
+    // budget would otherwise fail on a CI runner for 2 KB. 0.02 MB is far below any allocation an exercise makes.
+    const double AllocNoiseMb = 0.02;
 
     private static double MachineFactor()
     {
