@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\exercises\S-DB01-boss-sales-dashboard\Program.cs" Link="Program.cs" />
+    <ProjectReference Include="..\..\..\..\src\PerfLab.Harness\PerfLab.Harness.csproj" />
+    <ProjectReference Include="..\..\..\..\src\PerfLab.Harness.Raven\PerfLab.Harness.Raven.csproj" />
+  </ItemGroup>
+</Project>

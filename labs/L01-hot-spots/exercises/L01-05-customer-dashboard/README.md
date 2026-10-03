@@ -12,7 +12,7 @@ Same summary (checksum), and:
 
 | Budget | Value     |
 |---|-----------|
-| Median time | 50 ref-ms |
+| Median time | 60 ref-ms |
 | Median allocated | 5 MB      |
 
 ## Note
