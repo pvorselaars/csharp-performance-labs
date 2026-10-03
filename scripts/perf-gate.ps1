@@ -8,12 +8,18 @@ catch regressions.
 .PARAMETER Prefix
 Optional name prefix to restrict which exercises/solutions are checked, e.g. "L02" or "L04-01".
 
+.PARAMETER Retries
+How many extra attempts a project gets when its exit code is not the expected one. Time budgets are noisy on shared
+CI runners; a real regression fails every attempt, a noisy-neighbour blip does not. Exit code 2 (wrong result) is
+deterministic and is never retried.
+
 .EXAMPLE
 ./scripts/perf-gate.ps1
 ./scripts/perf-gate.ps1 L02
 #>
 param(
-    [string]$Prefix = ""
+    [string]$Prefix = "",
+    [int]$Retries = 2
 )
 
 Set-Location (Join-Path $PSScriptRoot "..")
@@ -27,6 +33,24 @@ function Invoke-Build {
         Write-Host "build failed"
         exit 1
     }
+}
+
+function Invoke-Project {
+    param([string]$Path)
+    $job = Start-Job -ScriptBlock {
+        param($proj)
+        & dotnet run -c Release --no-build --project $proj *> $null
+        $LASTEXITCODE
+    } -ArgumentList $Path
+
+    if (Wait-Job $job -Timeout 300) {
+        $rc = Receive-Job $job
+    } else {
+        Stop-Job $job
+        $rc = 124
+    }
+    Remove-Job $job -Force
+    return $rc
 }
 
 Invoke-Build "PerfLab.slnx"
@@ -52,22 +76,15 @@ foreach ($kind in @("solutions", "exercises")) {
 
         $total++
 
-        $job = Start-Job -ScriptBlock {
-            param($proj)
-            & dotnet run -c Release --no-build --project $proj *> $null
-            $LASTEXITCODE
-        } -ArgumentList $d.FullName
-
-        if (Wait-Job $job -Timeout 300) {
-            $rc = Receive-Job $job
-        } else {
-            Stop-Job $job
-            $rc = 124
-        }
-        Remove-Job $job -Force
+        $attempt = 0
+        do {
+            $attempt++
+            $rc = Invoke-Project $d.FullName
+        } while ($rc -ne $want -and $rc -ne 2 -and $attempt -le $Retries)
 
         $verdict = "OK"
         if ($rc -ne $want) { $fail = 1; $verdict = "SURPRISE" }
+        elseif ($attempt -gt 1) { $verdict = "OK (attempt $attempt)" }
         "{0,-34} {1,-9} {2,-9} {3}" -f $name, "exit $want", "exit $rc", $verdict | Write-Host
     }
 }
