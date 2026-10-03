@@ -25,7 +25,7 @@ public static class Workload
         RequestCounter.Reset();
         using var session = Db.Store.OpenSession();
         long total = 0;
-        var orders = session.Query<Order>().Include(o => o.CustomerId).Take(100).ToList();
+        var orders = session.Query<Order>().Take(100).ToList();
         foreach (var o in orders)
         {
             var customer = session.Load<Customer>(o.CustomerId);
