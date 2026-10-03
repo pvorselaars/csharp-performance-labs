@@ -39,14 +39,17 @@ function Invoke-Project {
     param([string]$Path)
     $job = Start-Job -ScriptBlock {
         param($proj)
-        & dotnet run -c Release --no-build --project $proj *> $null
-        $LASTEXITCODE
+        $text = & dotnet run -c Release --no-build --project $proj 2>&1 | Out-String
+        [pscustomobject]@{ Rc = $LASTEXITCODE; Text = $text }
     } -ArgumentList $Path
 
     if (Wait-Job $job -Timeout 300) {
-        $rc = Receive-Job $job
+        $r = Receive-Job $job
+        $script:LastOutput = $r.Text
+        $rc = $r.Rc
     } else {
         Stop-Job $job
+        $script:LastOutput = "timed out after 300 s"
         $rc = 124
     }
     Remove-Job $job -Force
@@ -86,6 +89,12 @@ foreach ($kind in @("solutions", "exercises")) {
         if ($rc -ne $want) { $fail = 1; $verdict = "SURPRISE" }
         elseif ($attempt -gt 1) { $verdict = "OK (attempt $attempt)" }
         "{0,-34} {1,-9} {2,-9} {3}" -f $name, "exit $want", "exit $rc", $verdict | Write-Host
+        if ($rc -ne $want) {
+            # Show why: the machine factor and the metric table of the last attempt, so a CI log is enough to
+            # tell a tight budget from noise.
+            $lines = $script:LastOutput -split "\r?\n" | Where-Object { $_ -match '^(Machine factor|metric|median|[a-zA-Z0-9]+ +[0-9.]+ +[0-9.]+ |RESULT|WRONG|Unhandled|   at )' } | Select-Object -First 25
+            $lines | ForEach-Object { Write-Host "    $_" }
+        }
     }
 }
 
