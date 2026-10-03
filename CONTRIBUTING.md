@@ -5,7 +5,7 @@ Everything else in this repo is written for someone *solving* an exercise. This 
 ## Adding a new exercise
 
 ### Naming
-`L<lab>-<NN>-<slug>` (e.g. `L02-07-route-stats`). A lab's final boss is `L<lab>-boss-<slug>` instead of a number. Lab 8 is the exception: its exercises are compiled "mystery services" (`L08-01-triage`, …), not exercises; see [labs/L08-production/README.md](labs/L08-production/README.md) if you're adding one of those instead.
+`L<lab>-<NN>-<slug>` (e.g. `L02-07-route-stats`). Optional specialization tracks live under `specializations/<track>/{exercises,solutions}/` with their own prefix (RavenDB: `S-DB01-<NN>-<slug>`). A lab's final boss is `L<lab>-boss-<slug>` instead of a number. Lab 8 is the exception: its exercises are compiled "mystery services" (`L08-01-triage`, …), not exercises; see [labs/L08-production/README.md](labs/L08-production/README.md) if you're adding one of those instead.
 
 ### Required files
 Every exercise is a matched pair of projects:

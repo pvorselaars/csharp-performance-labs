@@ -43,7 +43,7 @@ Optional side tracks that branch off the core labs, so the core stays at fifteen
 
 | Track                          | Prerequisite | Topics                                                            | Status |
 |--------------------------------|--------------|-------------------------------------------------------------------|--------|
-| Databases: RavenDB             | L4, L11      | sessions, N+1, indexes, projections, bulk insert                  | 💡     |
+| Databases: RavenDB             | L4, L11      | sessions, N+1, indexes, projections, bulk insert                  | 🚧     |
 | Observability                  | L9, L13      | OpenTelemetry overhead, log volume, metric cardinality, sampling  | 💡     |
 | Serialization & wire formats   | L2, L5       | source generators, streaming readers, Protobuf/MessagePack        | 💡     |
 | Systems design patterns        | L4, L12      | rate limiting, circuit breaker, bulkhead, idempotency, distributed locks, consistent hashing, replication/quorum | 💡     |

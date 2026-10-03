@@ -39,7 +39,9 @@ $total = 0
 
 foreach ($kind in @("solutions", "exercises")) {
     $want = if ($kind -eq "exercises") { 1 } else { 0 }
-    $dirs = Get-ChildItem -Path "labs/*/$kind/$Prefix*" -Directory -ErrorAction SilentlyContinue | Sort-Object FullName
+    $dirs = @("labs/*/$kind/$Prefix*", "specializations/*/$kind/$Prefix*") |
+        ForEach-Object { Get-ChildItem -Path $_ -Directory -ErrorAction SilentlyContinue } |
+        Sort-Object FullName
 
     foreach ($d in $dirs) {
         $programCs = Join-Path $d.FullName "Program.cs"
@@ -60,7 +62,7 @@ foreach ($kind in @("solutions", "exercises")) {
             $rc = Receive-Job $job
         } else {
             Stop-Job $job
-            $rc = 124   # matches GNU `timeout`'s convention for "timed out"
+            $rc = 124
         }
         Remove-Job $job -Force
 

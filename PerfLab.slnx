@@ -118,6 +118,24 @@
     <Project Path="labs/L10-async-under-load/exercises/L10-06-background-jobs/L10-06-background-jobs.csproj" />
     <Project Path="labs/L10-async-under-load/exercises/L10-boss-async-quotes/L10-boss-async-quotes.csproj" />
   </Folder>
+  <Folder Name="/S-DB01-ravendb/">
+    <Project Path="specializations/ravendb/exercises/S-DB01-01-order-feed/S-DB01-01-order-feed.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-02-job-sweeper/S-DB01-02-job-sweeper.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-03-revenue-tile/S-DB01-03-revenue-tile.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-04-finance-page/S-DB01-04-finance-page.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-05-article-export/S-DB01-05-article-export.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-06-sensor-ingest/S-DB01-06-sensor-ingest.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-07-note-sweep/S-DB01-07-note-sweep.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-08-red-products/S-DB01-08-red-products.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-09-leaderboard/S-DB01-09-leaderboard.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-10-big-invoices/S-DB01-10-big-invoices.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-11-country-report/S-DB01-11-country-report.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-12-brand-sidebar/S-DB01-12-brand-sidebar.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-13-ticket-import/S-DB01-13-ticket-import.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-14-gauge-writer/S-DB01-14-gauge-writer.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-15-contract-audit/S-DB01-15-contract-audit.csproj" />
+    <Project Path="specializations/ravendb/exercises/S-DB01-boss-sales-dashboard/S-DB01-boss-sales-dashboard.csproj" />
+  </Folder>
   <Folder Name="/L11-data-access/">
     <Project Path="labs/L11-data-access/exercises/L11-01-orders-dashboard/L11-01-orders-dashboard.csproj" />
     <Project Path="labs/L11-data-access/exercises/L11-02-customer-profile/L11-02-customer-profile.csproj" />
@@ -143,6 +161,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/PerfLab.Harness.Data/PerfLab.Harness.Data.csproj" />
+    <Project Path="src/PerfLab.Harness.Raven/PerfLab.Harness.Raven.csproj" />
     <Project Path="src/PerfLab.Harness.Web/PerfLab.Harness.Web.csproj" />
     <Project Path="src/PerfLab.Harness/PerfLab.Harness.csproj" />
   </Folder>
