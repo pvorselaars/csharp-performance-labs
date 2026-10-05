@@ -76,3 +76,8 @@ Any doc page can have a Dutch translation living right next to it, named
 be added incrementally, page by page. Translate meaning, not word-for-word:
 keep the same voice rules as above (e.g. exercise `README.md`s never naming
 the bug), even where that means departing from a literal translation.
+
+If your PR adds a new page, or changes an existing one that already has a
+`.nl.md` sibling, please add or update the Dutch translation alongside it so
+the two don't drift out of sync. Not required to get a PR merged, but
+appreciated.
