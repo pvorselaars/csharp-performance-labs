@@ -1,16 +1,49 @@
 name: perf-gate
 on:
   pull_request:
-    paths: ['src/**', 'solutions/**', 'labs/**', 'Directory.Build.props']
+    paths: ['src/**', 'solutions/**', 'labs/**', 'specializations/**', 'Directory.Build.props', 'global.json', 'scripts/perf-gate.ps1', 'scripts/changed-prefixes.ps1']
 jobs:
+  changes:
+    name: affected gates
+    runs-on: ubuntu-latest
+    outputs:
+      prefixes: ${{ steps.p.outputs.prefixes }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - id: p
+        shell: pwsh
+        run: |
+          $prefixes = ./scripts/changed-prefixes.ps1 "origin/${{ github.base_ref }}"
+          "prefixes=$prefixes" >> $env:GITHUB_OUTPUT
+
   gate:
-    runs-on: ubuntu-latest        # noisy shared runner: expect flaky time budgets; prefer a self-hosted runner for real gates
+    name: gate (${{ matrix.prefix }})
+    needs: changes
+    if: needs.changes.outputs.prefixes != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false      # let every lab report; one noisy lab must not hide the others
+      matrix:
+        prefix: ${{ fromJson(needs.changes.outputs.prefixes) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with: { dotnet-version: '10.0.x' }
-      - name: Perf gate (Lab 2 only, as an example)
+      - name: Performance gate
         shell: pwsh
-        run: ./scripts/perf-gate.ps1 L02
+        # Solutions get 2x slack on time budgets: the runner has far fewer cores than the calibration machine.
+        run: ./scripts/perf-gate.ps1 ${{ matrix.prefix }} -SolutionTimeSlack 2
         env:
           PERFLAB_NO_SCALE: '0'
+
+  # One always-running job to require in branch protection: matrix jobs are skipped (not green) when
+  # nothing is affected, which would leave a required per-lab check pending forever.
+  result:
+    name: perf-gate
+    needs: gate
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          if [[ "${{ needs.gate.result }}" == "failure" || "${{ needs.gate.result }}" == "cancelled" ]]; then exit 1; fi

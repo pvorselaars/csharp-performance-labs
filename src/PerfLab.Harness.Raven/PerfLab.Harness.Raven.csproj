@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="RavenDB.Embedded" Version="7.2.6" />
+    <ProjectReference Include="..\PerfLab.Harness\PerfLab.Harness.csproj" />
+  </ItemGroup>
+</Project>
