@@ -25,7 +25,6 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
   features:
-    - navigation.instant
     - navigation.sections
     - navigation.top
     - navigation.indexes
@@ -40,6 +39,18 @@ plugins:
   # used where alphabetical order would spoil something, e.g. ANSWERS.md sorting
   # before QUESTIONS.md in the Lab 8 exercises.
   - awesome-pages
+  # Bilingual pages: a page's Dutch translation lives alongside it as
+  # foo.nl.md. Pages without a .nl.md fall back to the English version.
+  - i18n:
+      docs_structure: suffix
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: nl
+          name: Nederlands
+          build: true
 
 # Mermaid is loaded here (Material would otherwise fetch the same file itself) so mermaid-theme.js can add the
 # dark-mode rules Material's own Mermaid theming lacks for xy charts.

@@ -1,0 +1,10 @@
+# Antwoorden
+
+1. **Self-tijd:** bijna helemaal in de hash-lus (`Hash`, het blad onder `Compress`). **Inclusive:** `Compress` domineert de `service!`-frames.
+2. **Pad:** `Main -> HandleRequest -> Render -> Template -> Layout -> Widgets -> Serialize -> Compress -> Hash`.
+3. `Compress` is goed voor ongeveer **99% van de tijd besteed binnen `HandleRequest`** (45,6% van de 46,2% van `HandleRequest` in één capture). De rest van de trace-tijd zijn runtime/GC-poll-frames, die je kunt negeren.
+4. Kijk naar de **dure minderheid**, niet de gemiddelde request. De graph geeft je alleen *tijd*: `Compress` is ~99% van `HandleRequest`, en zit onderaan een diep, enkelvoudig pad (`Render -> Template -> Layout -> Widgets -> Serialize`), dus wat hem aanroept is niet het gewone geval. Een sampling profile kan je geen *call counts* geven. Om "zeldzaam maar duur" te bewijzen heb je beide getallen nodig: **tijdsaandeel** (inclusive % uit de sampling-trace) en **aantal aanroepen** (uit een geïnstrumenteerde of tracing profile, of een counter die je zelf toevoegt). Weinig aanroepen met een enorm tijdsaandeel betekent dat de kosten *per aanroep* zitten, en dat is waar je moet optimaliseren.
+5. De goedkope helpers (`Authenticate`, `Route`, `Lookup`, `Normalize`) **komen helemaal niet voor in de trace**: in deze captures zijn de enige `service!`-frames `Main`, `HandleRequest`, `Render`, `Template`, `Layout`, `Widgets`, `Serialize`, `Compress` en `Hash`. Die afwezigheid is het antwoord: ze kosten zo weinig tijd dat de sampler er bijna niets van opvangt. In een flame graph is **breedte = tijd**, dus een functie die je niet kunt zien, kun je negeren. (Zelfs `Serialize` en `Layout` krijgen maar ~0,2–0,3% elk van hun eigen `Hash`-aanroepen.)
+
+## Wat je hierna zou doen
+Optimaliseer of cache `Compress` (het enige stuk code dat de moeite waard is), of roep het minder vaak aan (de fan-out `Template -> Layout -> Widgets -> Serialize` erboven vermenigvuldigt de aanroepen; het pad in de trace toont waar dat gebeurt, en een call-count profile zou vertellen hoeveel). Profileer daarna opnieuw: de graph verandert van vorm.

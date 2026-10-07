@@ -68,3 +68,16 @@ This is also what [.github/workflows/perf-gate.yml](.github/workflows/perf-gate.
 ## Other changes
 - **Docs** (`README.md`, `ROADMAP.md`, `docs/`, `templates/`): built with MkDocs. `./scripts/build-docs.ps1` (or `-Serve` for local preview) builds under `--strict`, which fails on broken internal links; run it before opening a PR that touches markdown.
 - **The harness** (`src/PerfLab.Harness`, `src/PerfLab.Harness.Web`): keep XML doc comments current on the public API (`LabSpec`, `Lab.Run`, `Lab.RecordLatency`, `Lab.Report`, `WebRig`'s public members); they're the first thing IntelliSense shows an exercise author.
+
+### Translations
+Any doc page can have a Dutch translation living right next to it, named
+`<page>.nl.md` (e.g. `README.nl.md` next to `README.md`). Pages without a
+`.nl.md` fall back to the English version automatically, so translations can
+be added incrementally, page by page. Translate meaning, not word-for-word:
+keep the same voice rules as above (e.g. exercise `README.md`s never naming
+the bug), even where that means departing from a literal translation.
+
+If your PR adds a new page, or changes an existing one that already has a
+`.nl.md` sibling, please add or update the Dutch translation alongside it so
+the two don't drift out of sync. Not required to get a PR merged, but
+appreciated.
